@@ -8,21 +8,9 @@ interface SidebarProps {
 export function Sidebar({ currentView, onNavigate }: SidebarProps) {
   return (
     <div className="flex h-full w-14 flex-col items-center border-r border-zinc-800 bg-zinc-950 py-4">
-      {/* Logo */}
       <div className="mb-8 text-lg font-extralight text-zinc-100">O</div>
 
-      {/* Nav items */}
       <nav className="flex flex-col items-center gap-2">
-        <NavButton
-          active={currentView === "chat"}
-          onClick={() => onNavigate("chat")}
-          title="Conversa"
-        >
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-            <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </NavButton>
-
         <NavButton
           active={currentView === "memories"}
           onClick={() => onNavigate("memories")}
@@ -50,7 +38,6 @@ export function Sidebar({ currentView, onNavigate }: SidebarProps) {
           onClick={() => onNavigate("ecosystem")}
           title="Ecossistema"
         >
-          {/* Puzzle/grid icon */}
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
