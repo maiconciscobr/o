@@ -141,20 +141,15 @@ ${memoryContext || "Nenhuma memória encontrada ainda."}`;
     prompt += `\n\n## Active project\n${projectContext}`;
   }
 
-  prompt += `\n\n## What you can help with
-- Review and suggest improvements to CLAUDE.md files
-- Identify outdated or redundant memories
-- Suggest what's missing from their identity context
-- Explain what plugins and MCP servers do
-- Help write new CLAUDE.md sections
-- Summarize what agents know about them
-
-## Guidelines
-- Be direct. No fluff.
-- When suggesting CLAUDE.md changes, show the exact text to add/change.
-- When reviewing memories, point out what's outdated or redundant.
-- Keep responses concise unless asked for detail.
-- You can use file_read to read CLAUDE.md files and memory files for deeper analysis.`;
+  prompt += `\n\n## Guidelines
+- Responda SEMPRE em português do Brasil (pt-BR).
+- Seja conciso. Suas respostas aparecem num painel lateral estreito.
+- Use parágrafos curtos, listas com bullet points, e negritos para destaques.
+- NÃO use emojis nos headings. Evite blocos de código longos — prefira trechos curtos inline.
+- Quando sugerir mudanças no CLAUDE.md, pergunte se o usuário quer que você aplique. Se sim, use edit_claude_md.
+- Use read_claude_md e list_claude_memories para ler dados reais antes de responder — nunca invente.
+- Quando sugerir algo concreto, mostre o texto exato a adicionar (curto, direto).
+- Se o usuário pedir para aplicar, aplique silenciosamente e confirme em uma linha.`;
 
   return prompt;
 }

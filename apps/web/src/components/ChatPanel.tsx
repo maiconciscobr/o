@@ -1,9 +1,30 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { marked } from "marked";
+
+// Configure marked for clean output
+marked.setOptions({
+  breaks: true,
+  gfm: true,
+});
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+}
+
+function RenderedMarkdown({ content }: { content: string }) {
+  const html = useMemo(() => {
+    if (!content) return "";
+    return marked.parse(content) as string;
+  }, [content]);
+
+  return (
+    <div
+      className="chat-markdown"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
 }
 
 export function ChatPanel() {
@@ -135,14 +156,18 @@ export function ChatPanel() {
               className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[90%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
+                className={`max-w-[90%] rounded-xl px-3.5 py-2.5 text-sm ${
                   m.role === "user"
                     ? "bg-white text-black"
                     : "text-zinc-200"
                 }`}
                 style={m.role === "assistant" ? { backgroundColor: "var(--bg-surface)" } : undefined}
               >
-                <pre className="whitespace-pre-wrap font-sans">{m.content}</pre>
+                {m.role === "user" ? (
+                  <span>{m.content}</span>
+                ) : (
+                  <RenderedMarkdown content={m.content} />
+                )}
               </div>
             </div>
           ))}
