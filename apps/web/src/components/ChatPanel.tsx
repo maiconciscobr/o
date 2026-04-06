@@ -332,18 +332,19 @@ export function ChatPanel() {
             placeholder={streaming ? "Aguarde a resposta..." : "Pergunte sobre sua identidade..."}
             disabled={streaming}
             rows={1}
-            className="flex-1 resize-none rounded-lg border border-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition-[border-color,box-shadow] duration-200 focus:border-zinc-600 focus:shadow-[0_0_0_3px_rgba(113,113,122,0.1)] disabled:opacity-40"
-            style={{ backgroundColor: "var(--bg-surface)", minHeight: "36px", maxHeight: "120px" }}
+            className="flex-1 resize-none overflow-hidden rounded-lg border border-zinc-800 px-3 py-2 text-sm leading-5 text-zinc-100 placeholder-zinc-600 outline-none transition-[border-color,box-shadow] duration-200 focus:border-zinc-600 focus:shadow-[0_0_0_3px_rgba(113,113,122,0.1)] disabled:opacity-40"
+            style={{ backgroundColor: "var(--bg-surface)", height: "36px", maxHeight: "120px" }}
             onInput={(e) => {
               const t = e.target as HTMLTextAreaElement;
-              t.style.height = "auto";
+              t.style.height = "36px";
               t.style.height = `${Math.min(t.scrollHeight, 120)}px`;
+              t.style.overflow = t.scrollHeight > 120 ? "auto" : "hidden";
             }}
           />
           <button
             onClick={send}
             disabled={streaming || !input.trim()}
-            className="btn-send shrink-0 rounded-lg px-3 py-2 transition-all duration-150 disabled:opacity-20"
+            className="btn-send flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all duration-150 disabled:opacity-20"
             style={{
               backgroundColor: input.trim() && !streaming ? "oklch(0.85 0.005 260)" : "oklch(0.3 0.005 260)",
               color: input.trim() && !streaming ? "oklch(0.13 0.005 260)" : "oklch(0.5 0.005 260)",
