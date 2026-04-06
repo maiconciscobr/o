@@ -29,7 +29,6 @@ export function EcosystemBar({ search }: Props) {
   const [mcpServers, setMcpServers] = useState<McpServer[]>([]);
   const [marketplaces, setMarketplaces] = useState<Marketplace[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAllPlugins, setShowAllPlugins] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -73,7 +72,7 @@ export function EcosystemBar({ search }: Props) {
         {[1, 2, 3].map((i) => (
           <div key={i} className="rounded-xl border border-zinc-800 px-4 py-4" style={{ backgroundColor: "var(--bg-surface)" }}>
             <div className="h-4 w-24 rounded skeleton-shimmer" />
-            <div className="mt-3 h-2 w-full rounded skeleton-shimmer" />
+            <div className="mt-3 h-8 w-full rounded skeleton-shimmer" />
           </div>
         ))}
       </div>
@@ -84,79 +83,50 @@ export function EcosystemBar({ search }: Props) {
     <div className="space-y-4">
       {/* Plugins */}
       <div
-        className="card-glow rounded-xl border border-zinc-800 px-4 py-4 transition-all duration-200 hover:border-zinc-700 animate-[fade-in-up_300ms_ease-out_both]"
+        className="card-glow rounded-xl border border-zinc-800 px-5 py-5 transition-all duration-200 hover:border-zinc-700 animate-[fade-in-up_300ms_ease-out_both]"
         style={{ backgroundColor: "var(--bg-surface)" }}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-zinc-100">Plugins</span>
             <span className="text-xs text-zinc-500">
-              {enabledCount} ativos de {plugins.length}
+              {enabledCount}/{plugins.length} ativos
             </span>
           </div>
-          <button
-            onClick={() => setShowAllPlugins(!showAllPlugins)}
-            className="text-[10px] text-zinc-500 transition-colors duration-150 hover:text-zinc-300"
-          >
-            {showAllPlugins ? "Recolher" : "Ver todos"}
-          </button>
         </div>
 
-        {/* Visual bar with tooltips */}
-        <div className="mt-3 flex gap-0.5">
+        <div className="space-y-0.5">
           {filteredPlugins.map((p) => (
-            <button
+            <div
               key={p.id}
-              onClick={() => togglePlugin(p.id, !p.enabled)}
-              className={`group relative flex-1 rounded-full transition-all duration-200 ${
-                p.enabled
-                  ? "h-2 bg-emerald-500 hover:h-3 hover:bg-emerald-400"
-                  : "h-2 bg-zinc-700 hover:h-3 hover:bg-zinc-600"
-              }`}
+              className="flex items-center justify-between rounded-lg px-3 py-2 transition-colors duration-150 hover:bg-white/[0.02]"
             >
-              <span className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded px-2 py-1 text-[10px] text-zinc-300 opacity-0 transition-opacity duration-150 group-hover:opacity-100 shadow-lg" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border-subtle)" }}>
-                {p.name}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Full list */}
-        <div
-          className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-            showAllPlugins ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-          }`}
-        >
-          <div className="overflow-hidden">
-            <div className="mt-4 grid grid-cols-2 gap-1 sm:grid-cols-3">
-              {filteredPlugins.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => togglePlugin(p.id, !p.enabled)}
-                  className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-all duration-150 ${
-                    p.enabled
-                      ? "bg-zinc-800/80 hover:bg-zinc-800"
-                      : "bg-zinc-900/30 opacity-40 hover:opacity-70"
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-sm text-zinc-200 truncate">{p.name}</span>
+                <span className="shrink-0 text-[10px] text-zinc-600">{p.marketplace}</span>
+              </div>
+              <button
+                role="switch"
+                aria-checked={p.enabled}
+                onClick={() => togglePlugin(p.id, !p.enabled)}
+                className={`relative h-5 w-9 shrink-0 rounded-full transition-colors duration-200 ${
+                  p.enabled ? "bg-emerald-500" : "bg-zinc-700"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    p.enabled ? "translate-x-4" : "translate-x-0"
                   }`}
-                >
-                  <span
-                    className={`h-1.5 w-1.5 shrink-0 rounded-full transition-colors duration-200 ${
-                      p.enabled ? "bg-emerald-400" : "bg-zinc-600"
-                    }`}
-                  />
-                  <span className="truncate text-[11px] text-zinc-300">
-                    {p.name}
-                  </span>
-                </button>
-              ))}
+                />
+              </button>
             </div>
-          </div>
+          ))}
         </div>
       </div>
 
       {/* MCP Servers */}
       <div
-        className="card-glow rounded-xl border border-zinc-800 px-4 py-4 transition-all duration-200 hover:border-zinc-700 animate-[fade-in-up_300ms_ease-out_both]"
+        className="card-glow rounded-xl border border-zinc-800 px-5 py-5 transition-all duration-200 hover:border-zinc-700 animate-[fade-in-up_300ms_ease-out_both]"
         style={{ backgroundColor: "var(--bg-surface)", animationDelay: "60ms" }}
       >
         <span className="text-sm font-medium text-zinc-100">MCP Servers</span>
@@ -182,7 +152,7 @@ export function EcosystemBar({ search }: Props) {
 
       {/* Marketplaces */}
       <div
-        className="card-glow rounded-xl border border-zinc-800 px-4 py-4 transition-all duration-200 hover:border-zinc-700 animate-[fade-in-up_300ms_ease-out_both]"
+        className="card-glow rounded-xl border border-zinc-800 px-5 py-5 transition-all duration-200 hover:border-zinc-700 animate-[fade-in-up_300ms_ease-out_both]"
         style={{ backgroundColor: "var(--bg-surface)", animationDelay: "120ms" }}
       >
         <span className="text-sm font-medium text-zinc-100">Marketplaces</span>
@@ -194,9 +164,7 @@ export function EcosystemBar({ search }: Props) {
             >
               <span className="text-xs text-zinc-200">{mk.name}</span>
               {mk.repo && (
-                <span className="ml-1.5 text-[10px] text-zinc-600">
-                  {mk.repo}
-                </span>
+                <span className="ml-1.5 text-[10px] text-zinc-600">{mk.repo}</span>
               )}
             </div>
           ))}
