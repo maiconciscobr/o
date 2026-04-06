@@ -176,3 +176,65 @@ body {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+/* Chat message entrance */
+@keyframes msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-msg-in {
+  animation: msg-in 0.3s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Blinking cursor */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 0.7s infinite;
+}
+
+/* Thinking shimmer bar */
+@keyframes thinking-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.thinking-bar {
+  overflow: hidden;
+  position: relative;
+}
+
+.thinking-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, oklch(0.5 0.05 250 / 0.15), transparent);
+  animation: thinking-bar 1.5s ease-in-out infinite;
+}
+
+/* Send button press */
+.btn-send:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+/* Suggestion card entrance */
+@keyframes suggestion-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
