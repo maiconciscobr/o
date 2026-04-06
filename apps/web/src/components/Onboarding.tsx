@@ -39,21 +39,21 @@ export function Onboarding({ onComplete }: OnboardingProps) {
           O
         </h1>
         <p className="mt-6 text-lg font-light text-zinc-400">
-          Your AI agents forget you. O doesn't.
+          Seus agentes de IA te esquecem. O Ō não.
         </p>
 
         {step === "question" && (
           <div className="mt-12">
             <p className="text-sm leading-relaxed text-zinc-300">
-              What did you have to explain to an AI agent this week
+              O que você teve que explicar para um agente de IA essa semana
               <br />
-              that you've already explained before?
+              que já tinha explicado antes?
             </p>
 
             <textarea
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              placeholder="e.g. I use Fastify, not Express. My backend runs on SQLite. I prefer functional style..."
+              placeholder="ex: Eu uso Fastify, não Express. Meu backend roda em SQLite. Prefiro estilo funcional..."
               className="mt-6 w-full resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-500"
               rows={4}
               autoFocus
@@ -64,13 +64,13 @@ export function Onboarding({ onComplete }: OnboardingProps) {
                 onClick={handleSkip}
                 className="text-sm text-zinc-500 hover:text-zinc-300"
               >
-                Skip for now
+                Pular por agora
               </button>
               <button
                 onClick={handleSubmit}
                 className="rounded-lg bg-white px-6 py-2.5 text-sm font-medium text-black transition hover:bg-zinc-200"
               >
-                Save and start
+                Salvar e começar
               </button>
             </div>
           </div>
@@ -78,7 +78,7 @@ export function Onboarding({ onComplete }: OnboardingProps) {
 
         {step === "saving" && (
           <div className="mt-12 text-sm text-zinc-400">
-            Saving your first memory...
+            Salvando sua primeira memória...
           </div>
         )}
       </div>

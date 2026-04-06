@@ -38,7 +38,7 @@ export function App() {
         {/* Header */}
         <header className="flex items-center justify-between border-b border-zinc-800 px-6 py-3">
           <h2 className="text-sm font-medium text-zinc-400">
-            {view === "chat" ? "Chat" : "Memories"}
+            {view === "chat" ? "Chat" : "Memórias"}
           </h2>
           <McpStatus />
         </header>

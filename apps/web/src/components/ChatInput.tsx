@@ -35,7 +35,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Talk to Ō..."
+          placeholder="Fale com o Ō..."
           disabled={disabled}
           rows={1}
           className="flex-1 resize-none rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-zinc-500 disabled:opacity-50"
@@ -51,7 +51,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
           disabled={disabled || !text.trim()}
           className="rounded-lg bg-white px-4 py-3 text-sm font-medium text-black transition hover:bg-zinc-200 disabled:opacity-30"
         >
-          Send
+          Enviar
         </button>
       </div>
     </div>

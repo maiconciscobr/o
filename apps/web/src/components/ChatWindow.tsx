@@ -24,7 +24,7 @@ export function ChatWindow() {
                 {greeting}
               </h1>
               <p className="mt-3 text-sm text-zinc-500">
-                Ō remembers. Ask anything.
+                Ō lembra. Pergunte qualquer coisa.
               </p>
             </div>
           )}
@@ -59,7 +59,7 @@ export function ChatWindow() {
 
 function getGreeting(): string {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  if (hour < 12) return "Bom dia";
+  if (hour < 18) return "Boa tarde";
+  return "Boa noite";
 }

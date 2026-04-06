@@ -14,7 +14,7 @@ export function Sidebar({ currentView, onNavigate }: SidebarProps) {
         <NavButton
           active={currentView === "chat"}
           onClick={() => onNavigate("chat")}
-          title="Chat"
+          title="Conversa"
         >
           {/* Chat icon */}
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
@@ -25,7 +25,7 @@ export function Sidebar({ currentView, onNavigate }: SidebarProps) {
         <NavButton
           active={currentView === "memories"}
           onClick={() => onNavigate("memories")}
-          title="Memories"
+          title="Memórias"
         >
           {/* Brain icon */}
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
