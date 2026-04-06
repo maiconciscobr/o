@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { SideSheet } from "./SideSheet";
 
 interface MemoryFile {
   name: string;
@@ -23,6 +24,14 @@ const TYPE_COLORS: Record<string, string> = {
   other: "bg-zinc-500/20 text-zinc-400",
 };
 
+const TYPE_LABELS: Record<string, string> = {
+  user: "Sobre você",
+  feedback: "Feedback",
+  project: "Projeto",
+  reference: "Referência",
+  other: "Outros",
+};
+
 interface Props {
   search: string;
   onCount: (n: number) => void;
@@ -31,7 +40,7 @@ interface Props {
 export function MemoryCards({ search, onCount }: Props) {
   const [projects, setProjects] = useState<ProjectMemory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [selected, setSelected] = useState<ProjectMemory | null>(null);
   const [openMemory, setOpenMemory] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,6 +53,11 @@ export function MemoryCards({ search, onCount }: Props) {
       })
       .catch(() => setLoading(false));
   }, [onCount]);
+
+  const handleClose = useCallback(() => {
+    setSelected(null);
+    setOpenMemory(null);
+  }, []);
 
   if (loading) return <CardSkeleton />;
 
@@ -70,24 +84,15 @@ export function MemoryCards({ search, onCount }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-      {filtered.map((project, index) => (
-        <div
-          key={project.projectPath}
-          style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
-          className="animate-[fade-in-up_300ms_ease-out_both]"
-        >
-          {/* Card */}
+    <>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        {filtered.map((project, index) => (
           <button
-            onClick={() =>
-              setExpanded(expanded === project.projectPath ? null : project.projectPath)
-            }
-            className={`card-glow w-full rounded-xl border px-4 py-4 text-left transition-all duration-200 ease-out ${
-              expanded === project.projectPath
-                ? "border-zinc-600 bg-zinc-900 shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
-                : "border-zinc-800 hover:-translate-y-0.5 hover:border-zinc-600 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
-            }`}
-            style={{ backgroundColor: "var(--bg-surface)" }}
+            key={project.projectPath}
+            onClick={() => setSelected(project)}
+            style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
+            className="card-glow w-full animate-[fade-in-up_300ms_ease-out_both] rounded-xl border border-zinc-800 px-4 py-4 text-left transition-all duration-200 ease-out hover:-translate-y-0.5 hover:border-zinc-600 hover:shadow-[0_4px_12px_rgba(0,0,0,0.4)]"
+            {...{ style: { backgroundColor: "var(--bg-surface)", animationDelay: `${Math.min(index * 50, 400)}ms` } }}
           >
             <p className="text-sm font-medium text-zinc-100">{project.project}</p>
             <p className="mt-1 text-xs text-zinc-500">
@@ -106,70 +111,79 @@ export function MemoryCards({ search, onCount }: Props) {
               ))}
             </div>
           </button>
+        ))}
+      </div>
 
-          {/* Expanded list with collapse animation */}
-          <div
-            className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-              expanded === project.projectPath ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-            }`}
-          >
-            <div className="overflow-hidden">
-              <div className="mt-1 space-y-1 pt-1">
-                {project.memories.map((m, mi) => (
-                  <div
-                    key={m.filePath}
-                    style={{ animationDelay: `${mi * 30}ms` }}
-                    className={`rounded-lg border border-zinc-800/50 animate-[fade-in-up_200ms_ease-out_both] ${
-                      expanded === project.projectPath ? "" : "invisible"
+      {/* Side Sheet */}
+      <SideSheet
+        open={!!selected}
+        onClose={handleClose}
+        title={selected?.project || ""}
+        subtitle={`${selected?.memories.length || 0} memórias`}
+      >
+        {selected && (
+          <div className="space-y-2">
+            {selected.memories.map((m) => (
+              <div
+                key={m.filePath}
+                className="rounded-xl border border-zinc-800/50 transition-colors duration-150"
+                style={{ backgroundColor: "var(--bg-surface)" }}
+              >
+                <button
+                  onClick={() =>
+                    setOpenMemory(openMemory === m.filePath ? null : m.filePath)
+                  }
+                  className="flex w-full items-start gap-3 px-4 py-3 text-left rounded-xl transition-colors duration-150 hover:bg-white/[0.02]"
+                >
+                  <span
+                    className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-medium uppercase ${
+                      TYPE_COLORS[m.type] || TYPE_COLORS.other
                     }`}
-                    {...{ style: { backgroundColor: "var(--bg-surface)", animationDelay: `${mi * 30}ms` } }}
                   >
-                    <button
-                      onClick={() =>
-                        setOpenMemory(openMemory === m.filePath ? null : m.filePath)
-                      }
-                      className="flex w-full items-start gap-2 px-3 py-2 text-left transition-colors duration-150 hover:bg-white/[0.02] rounded-lg"
-                    >
-                      <span
-                        className={`mt-0.5 shrink-0 rounded px-1 py-0.5 text-[9px] font-medium uppercase ${
-                          TYPE_COLORS[m.type] || TYPE_COLORS.other
-                        }`}
-                      >
-                        {m.type}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium text-zinc-200 truncate">
-                          {m.name}
-                        </p>
-                        {m.description && (
-                          <p className="mt-0.5 text-[10px] text-zinc-500 truncate">
-                            {m.description}
-                          </p>
-                        )}
-                      </div>
-                    </button>
+                    {TYPE_LABELS[m.type] || m.type}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-zinc-200">
+                      {m.name}
+                    </p>
+                    {m.description && (
+                      <p className="mt-0.5 text-xs text-zinc-500">
+                        {m.description}
+                      </p>
+                    )}
+                  </div>
+                  <svg
+                    className={`mt-1 h-3.5 w-3.5 shrink-0 text-zinc-600 transition-transform duration-200 ${
+                      openMemory === m.filePath ? "rotate-180" : ""
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
 
-                    <div
-                      className={`grid transition-[grid-template-rows] duration-200 ease-out ${
-                        openMemory === m.filePath ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                      }`}
-                    >
-                      <div className="overflow-hidden">
-                        <div className="border-t border-zinc-800/50 px-3 py-2">
-                          <pre className="whitespace-pre-wrap text-[11px] leading-relaxed text-zinc-400 font-mono">
-                            {m.content}
-                          </pre>
-                        </div>
-                      </div>
+                <div
+                  className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+                    openMemory === m.filePath ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                  }`}
+                >
+                  <div className="overflow-hidden">
+                    <div className="border-t px-4 py-3" style={{ borderColor: "var(--border-subtle)" }}>
+                      <pre className="whitespace-pre-wrap text-xs leading-relaxed text-zinc-400 font-mono">
+                        {m.content}
+                      </pre>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            ))}
           </div>
-        </div>
-      ))}
-    </div>
+        )}
+      </SideSheet>
+    </>
   );
 }
 
