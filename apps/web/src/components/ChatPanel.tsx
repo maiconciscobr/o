@@ -158,10 +158,10 @@ export function ChatPanel() {
               <div
                 className={`max-w-[90%] rounded-xl px-3.5 py-2.5 text-sm ${
                   m.role === "user"
-                    ? "bg-white text-black"
+                    ? "border border-zinc-700 text-zinc-100"
                     : "text-zinc-200"
                 }`}
-                style={m.role === "assistant" ? { backgroundColor: "var(--bg-surface)" } : undefined}
+                style={{ backgroundColor: m.role === "user" ? "oklch(0.20 0.008 260)" : "var(--bg-surface)" }}
               >
                 {m.role === "user" ? (
                   <span>{m.content}</span>
