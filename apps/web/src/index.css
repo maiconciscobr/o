@@ -1,1 +1,72 @@
 @import "tailwindcss";
+
+:root {
+  --bg-base: oklch(0.13 0.005 260);
+  --bg-surface: oklch(0.17 0.005 260);
+  --border-subtle: oklch(0.25 0.005 260);
+}
+
+body {
+  background-color: var(--bg-base);
+}
+
+/* Collapse animation */
+@keyframes collapse-down {
+  from { grid-template-rows: 0fr; }
+  to   { grid-template-rows: 1fr; }
+}
+@keyframes collapse-up {
+  from { grid-template-rows: 1fr; }
+  to   { grid-template-rows: 0fr; }
+}
+
+/* Staggered entrance */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.02) 25%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.02) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Card glow on hover */
+.card-glow {
+  position: relative;
+}
+.card-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms;
+}
+.card-glow:hover::after {
+  opacity: 1;
+}

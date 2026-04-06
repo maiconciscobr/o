@@ -21,9 +21,9 @@ export function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen text-zinc-100" style={{ backgroundColor: "var(--bg-base)" }}>
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
+      <header className="sticky top-0 z-10 border-b backdrop-blur" style={{ borderColor: "var(--border-subtle)", backgroundColor: "oklch(0.13 0.005 260 / 0.85)" }}>
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <span className="text-xl font-extralight tracking-wide">Ō</span>
           <McpStatus />
@@ -47,13 +47,23 @@ export function App() {
         </div>
 
         {/* Search */}
-        <div className="mt-6">
+        <div className="group relative mt-6">
+          <svg
+            className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600 transition-colors duration-200 group-focus-within:text-zinc-400"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar em tudo..."
-            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm text-zinc-100 placeholder-zinc-600 outline-none focus:border-zinc-600"
+            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 py-3 pl-11 pr-5 text-sm text-zinc-100 placeholder-zinc-600 outline-none transition-[border-color,box-shadow] duration-200 focus:border-zinc-600 focus:shadow-[0_0_0_3px_rgba(113,113,122,0.1)]"
           />
         </div>
 
