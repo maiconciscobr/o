@@ -1,29 +1,22 @@
 # Ō
 
-**Dashboard para power users do Claude Code.**
+**Você sabe o que o Claude Code sabe sobre você?**
 
-Tudo que você configura na mão em JSONs e arquivos markdown, agora tem interface visual.
+Ō é um dashboard local que mostra tudo que está escondido na configuração do Claude Code: memórias automáticas, instruções (CLAUDE.md), plugins, MCP servers, marketplaces. Tudo num lugar só, com interface visual.
 
----
-
-## O que o Ō mostra
-
-| O que está escondido | Onde fica | O que o Ō faz |
-|---|---|---|
-| Memórias automáticas | `~/.claude/projects/*/memory/` | Mostra por projeto, expande em side sheet |
-| Instruções para agentes | `~/.claude/CLAUDE.md` + projetos | Visualiza por seções, edita inline |
-| Plugins instalados | `~/.claude/settings.json` | Lista com toggle on/off em tempo real |
-| MCP servers | `~/.claude.json` | Lista com status de conexão |
-| Marketplaces | `~/.claude/settings.json` | Lista fontes configuradas |
-
-Além disso, o **chat lateral** é um assistente de curadoria de identidade. Ele lê seus dados reais e pode **editar seu CLAUDE.md** direto pela conversa.
+O chat lateral lê seus dados reais e pode editar seu CLAUDE.md direto pela conversa.
 
 ---
 
-## Requisitos
+## O que você vê
 
-- Node.js 20+
-- Anthropic API key (para o chat lateral)
+| Escondido em... | O Ō mostra |
+|---|---|
+| `~/.claude/projects/*/memory/` | Memórias por projeto, com tipo e conteúdo |
+| `~/.claude/CLAUDE.md` + projetos | Todas as instruções, por seção, editáveis |
+| `~/.claude/settings.json` | Plugins com toggle on/off |
+| `~/.claude.json` | MCP servers conectados |
+| `settings.json` | Marketplaces configurados |
 
 ---
 
@@ -36,55 +29,56 @@ npm install
 npx tsx scripts/setup.ts
 ```
 
-Adicione sua `ANTHROPIC_API_KEY` no arquivo `.env` gerado.
+Adicione sua `ANTHROPIC_API_KEY` no `.env` gerado. Depois:
 
 ```bash
-npm run dev
+npm run dev -w apps/server
+npm run dev -w apps/web
 ```
 
 Abre `http://localhost:5173`.
 
 ---
 
-## Conectar ao Claude Code
+## Conectar o MCP ao Claude Code
 
-Clique em **"Conectar ao Claude Code"** no header, ou rode manualmente:
+Pelo terminal:
 
 ```bash
-claude mcp add o-mcp --transport stdio --scope user -- npx tsx /caminho/para/o/packages/mcp/src/index.ts
+claude mcp add o-mcp --transport stdio --scope user -- npx tsx caminho/para/packages/mcp/src/index.ts
 ```
+
+Ou pelo botão "Conectar ao Claude Code" no header do dashboard.
 
 ---
 
 ## Auto-start no Windows
 
-```bash
-# Executar como administrador
-scripts/install.bat
-```
+Execute `scripts/install.bat` como administrador. O servidor roda invisível no login.
 
-O servidor roda invisível (sem janela) toda vez que você liga o PC.
+Para remover: `scripts/uninstall.bat`.
 
 ---
 
 ## Stack
 
-- **Frontend:** React + Vite + Tailwind CSS
-- **Backend:** Fastify + SQLite (better-sqlite3)
-- **MCP:** @modelcontextprotocol/sdk
-- **AI (chat):** Anthropic SDK
-- **Estrutura:** Monorepo com npm workspaces
+| | |
+|---|---|
+| Frontend | React, Vite, Tailwind CSS |
+| Backend | Fastify, SQLite (better-sqlite3) |
+| MCP | @modelcontextprotocol/sdk |
+| Chat | Anthropic SDK |
+| Estrutura | Monorepo (npm workspaces) |
 
 ---
 
 ## Estrutura
 
 ```
-o/
-├── apps/web/          # Dashboard React
-├── apps/server/       # API Fastify
-├── packages/mcp/      # MCP server standalone
-└── scripts/           # Setup e auto-start
+apps/web/          → Dashboard React (single page)
+apps/server/       → API Fastify (lê configs do Claude Code)
+packages/mcp/      → MCP server standalone
+scripts/           → Setup e auto-start
 ```
 
 ---
@@ -92,8 +86,6 @@ o/
 ## Contribuindo
 
 Veja [CONTRIBUTING.md](./CONTRIBUTING.md).
-
----
 
 ## Licença
 

@@ -1,84 +1,66 @@
-# Contributing to Ō
-
-Thanks for your interest in contributing. Ō is early — bugs, ideas, and PRs are all welcome.
+# Contribuindo
 
 ## Setup
 
 ```bash
-# Clone
-git clone https://github.com/YOUR_ORG/o.git
+git clone https://github.com/maiconciscobr/o.git
 cd o
-
-# Install dependencies
 npm install
-
-# Create your .env
 cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
-
-# Run all three services in parallel
-npm run dev
+# Adicione sua ANTHROPIC_API_KEY no .env
 ```
 
-This starts:
-- **Web** on `http://localhost:5173` (Vite)
-- **Server** on `http://localhost:3131` (Fastify)
-- **MCP** on `http://localhost:3132` (when using `--http` flag)
-
-## Monorepo structure
-
-```
-o/
-├── apps/web/         # React + Vite frontend
-├── apps/server/      # Fastify + SQLite backend + KAIROS daemon
-└── packages/mcp/     # Standalone MCP server (npx o-mcp)
-```
-
-Each package has its own `package.json` and `tsconfig.json`. The root uses npm workspaces.
-
-## Running individual packages
+## Rodando
 
 ```bash
-# Only the server
+# Server (porta 3131)
 npm run dev -w apps/server
 
-# Only the frontend
+# Frontend (porta 5173)
 npm run dev -w apps/web
 
-# Only the MCP server (HTTP mode)
+# MCP server (porta 3132, modo HTTP)
 npm run dev -w packages/mcp
 ```
 
-## Commit conventions
-
-We use [Conventional Commits](https://www.conventionalcommits.org/):
+## Estrutura
 
 ```
-feat: add memory search
-fix: SSE stream not closing on abort
-docs: update MCP connection instructions
-refactor: extract memory grouping logic
+apps/web/          → React + Vite (dashboard)
+apps/server/       → Fastify (lê configs do Claude Code)
+packages/mcp/      → MCP server standalone
 ```
 
-## Opening a PR
+O servidor **não armazena** dados de identidade. Ele lê os arquivos que o Claude Code já usa (`~/.claude/`). O único dado próprio é o histórico de conversas do chat (SQLite em `data/`).
 
-1. Fork the repo
-2. Create a branch: `git checkout -b feat/your-feature`
-3. Make your changes
-4. Run `npm run build` to check for type errors
-5. Commit with a conventional commit message
-6. Open a PR against `main`
+## Commits
 
-## What we're looking for
+Conventional Commits:
 
-- Bug reports with reproduction steps
-- UX improvements to the memory panel or chat
-- New MCP tools (with clear use cases)
-- Documentation improvements
-- Performance improvements
+```
+feat: nova feature
+fix: correção de bug
+refactor: mudança sem alterar comportamento
+polish: melhoria visual/UX
+docs: documentação
+```
 
-## What to avoid
+## PRs
 
-- Adding external databases (SQLite is intentional)
-- Cloud features (Ō is local-first by design)
-- Dependencies that require native compilation beyond better-sqlite3
+1. Fork
+2. Branch: `feat/sua-feature`
+3. Commit
+4. PR contra `main`
+
+## O que queremos
+
+- Melhorias de UX no dashboard
+- Novos dados do Claude Code para exibir
+- Performance
+- Bug fixes
+
+## O que não queremos
+
+- Cloud features (Ō é local)
+- Banco de dados externo (SQLite é intencional)
+- Routing no frontend (é single page)
