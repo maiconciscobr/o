@@ -3,20 +3,17 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 
-interface ClaudeMdFile {
-  scope: "global" | "project";
-  path: string;
-  content: string;
-  exists: boolean;
-  sections: Section[];
-}
-
 interface Section {
   title: string;
   level: number;
   content: string;
-  startLine: number;
-  endLine: number;
+}
+
+interface ClaudeMdEntry {
+  label: string;
+  filePath: string;
+  content: string;
+  sections: Section[];
 }
 
 function parseSections(content: string): Section[] {
@@ -28,24 +25,16 @@ function parseSections(content: string): Section[] {
     const match = lines[i].match(/^(#{1,3})\s+(.+)/);
     if (match) {
       if (current) {
-        current.endLine = i - 1;
         current.content = current.content.trim();
         sections.push(current);
       }
-      current = {
-        title: match[2].trim(),
-        level: match[1].length,
-        content: "",
-        startLine: i,
-        endLine: i,
-      };
+      current = { title: match[2].trim(), level: match[1].length, content: "" };
     } else if (current) {
       current.content += lines[i] + "\n";
     }
   }
 
   if (current) {
-    current.endLine = lines.length - 1;
     current.content = current.content.trim();
     sections.push(current);
   }
@@ -53,57 +42,66 @@ function parseSections(content: string): Section[] {
   return sections;
 }
 
-function getGlobalPath(): string {
-  return path.join(os.homedir(), ".claude", "CLAUDE.md");
-}
+function findClaudeMdFiles(): ClaudeMdEntry[] {
+  const entries: ClaudeMdEntry[] = [];
 
-function readClaudeMd(filePath: string, scope: "global" | "project"): ClaudeMdFile {
-  const exists = fs.existsSync(filePath);
-  const content = exists ? fs.readFileSync(filePath, "utf-8") : "";
-  return {
-    scope,
-    path: filePath,
-    content,
-    exists,
-    sections: exists ? parseSections(content) : [],
-  };
+  // 1. Global ~/.claude/CLAUDE.md
+  const globalPath = path.join(os.homedir(), ".claude", "CLAUDE.md");
+  if (fs.existsSync(globalPath)) {
+    const content = fs.readFileSync(globalPath, "utf-8");
+    entries.push({
+      label: "Global",
+      filePath: globalPath,
+      content,
+      sections: parseSections(content),
+    });
+  }
+
+  // 2. Scan common project directories for CLAUDE.md files
+  const scanDirs = [
+    path.join(os.homedir(), "OneDrive", "Desktop"),
+    path.join(os.homedir(), "Desktop"),
+    path.join(os.homedir(), "Projects"),
+    path.join(os.homedir(), "repos"),
+    path.join(os.homedir(), "code"),
+  ];
+
+  for (const dir of scanDirs) {
+    if (!fs.existsSync(dir)) continue;
+
+    try {
+      const items = fs.readdirSync(dir, { withFileTypes: true });
+      for (const item of items) {
+        if (!item.isDirectory()) continue;
+        const claudeMdPath = path.join(dir, item.name, "CLAUDE.md");
+        if (fs.existsSync(claudeMdPath)) {
+          const content = fs.readFileSync(claudeMdPath, "utf-8");
+          entries.push({
+            label: item.name,
+            filePath: claudeMdPath,
+            content,
+            sections: parseSections(content),
+          });
+        }
+      }
+    } catch {
+      // permission errors, skip
+    }
+  }
+
+  return entries;
 }
 
 export function registerClaudeMdRoutes(app: FastifyInstance): void {
-  // List both global and project CLAUDE.md
-  app.get("/api/claude-md", async (request) => {
-    const { projectDir } = request.query as { projectDir?: string };
-
-    const files: ClaudeMdFile[] = [];
-
-    // Global
-    files.push(readClaudeMd(getGlobalPath(), "global"));
-
-    // Project (if provided)
-    if (projectDir) {
-      const projectPath = path.join(projectDir, "CLAUDE.md");
-      files.push(readClaudeMd(projectPath, "project"));
-    }
-
-    return files;
+  app.get("/api/claude-md", async () => {
+    return findClaudeMdFiles();
   });
 
-  // Get raw content of a specific file
   app.get("/api/claude-md/raw", async (request) => {
-    const { scope, projectDir } = request.query as {
-      scope: "global" | "project";
-      projectDir?: string;
-    };
-
-    const filePath =
-      scope === "global"
-        ? getGlobalPath()
-        : path.join(projectDir || process.cwd(), "CLAUDE.md");
-
-    if (!fs.existsSync(filePath)) {
+    const { path: filePath } = request.query as { path: string };
+    if (!filePath || !fs.existsSync(filePath)) {
       return { exists: false, content: "", path: filePath };
     }
-
     return {
       exists: true,
       content: fs.readFileSync(filePath, "utf-8"),
@@ -111,22 +109,13 @@ export function registerClaudeMdRoutes(app: FastifyInstance): void {
     };
   });
 
-  // Update content
   app.put("/api/claude-md", async (request) => {
-    const { scope, projectDir, content } = request.body as {
-      scope: "global" | "project";
-      projectDir?: string;
+    const { path: filePath, content } = request.body as {
+      path: string;
       content: string;
     };
-
-    const filePath =
-      scope === "global"
-        ? getGlobalPath()
-        : path.join(projectDir || process.cwd(), "CLAUDE.md");
-
     fs.mkdirSync(path.dirname(filePath), { recursive: true });
     fs.writeFileSync(filePath, content, "utf-8");
-
     return { ok: true, path: filePath };
   });
 }
