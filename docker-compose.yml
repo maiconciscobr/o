@@ -1,0 +1,38 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    ports:
+      - "3131:3131"
+    env_file: .env
+    volumes:
+      - o-data:/app/data
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+  mcp:
+    build:
+      context: .
+      dockerfile: packages/mcp/Dockerfile
+    ports:
+      - "3132:3132"
+    env_file: .env
+    environment:
+      - O_DB_PATH=/app/data/o.db
+    volumes:
+      - o-data:/app/data
+    command: ["node", "dist/index.js", "--http"]
+    restart: unless-stopped
+
+volumes:
+  o-data:

@@ -1,0 +1,21 @@
+{
+  "name": "o",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Your AI agents forget you. Ō doesn't.",
+  "license": "MIT",
+  "workspaces": [
+    "apps/web",
+    "apps/server",
+    "packages/mcp"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
