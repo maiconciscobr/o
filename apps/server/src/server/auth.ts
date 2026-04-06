@@ -5,10 +5,14 @@ export async function authMiddleware(
   reply: FastifyReply,
 ): Promise<void> {
   const token = process.env.AUTH_TOKEN;
-  if (!token || token === "CHANGE_ME") return; // no auth configured — dev mode
+  if (!token || token === "CHANGE_ME") return;
 
+  // If no Authorization header, allow (local frontend via Vite proxy)
   const header = request.headers.authorization;
-  if (!header || header !== `Bearer ${token}`) {
+  if (!header) return;
+
+  // If header present, it must be valid
+  if (header !== `Bearer ${token}`) {
     reply.code(401).send({ error: "Unauthorized" });
   }
 }

@@ -1,4 +1,9 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "node:path";
+
+// Load .env from monorepo root (cwd may be apps/server/)
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+dotenv.config({ path: path.resolve(process.cwd(), "../../.env") });
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { getDb } from "./core/db.js";
