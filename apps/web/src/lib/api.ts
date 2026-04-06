@@ -110,6 +110,37 @@ export const memories = {
     request(`/memories/${id}`, { method: "DELETE" }),
 };
 
+// ─── CLAUDE.md ──────────────────────────────────────────────────
+
+export interface ClaudeMdSection {
+  title: string;
+  level: number;
+  content: string;
+  startLine: number;
+  endLine: number;
+}
+
+export interface ClaudeMdFile {
+  scope: "global" | "project";
+  path: string;
+  content: string;
+  exists: boolean;
+  sections: ClaudeMdSection[];
+}
+
+export const claudeMd = {
+  list: () => request<ClaudeMdFile[]>("/claude-md"),
+  raw: (scope: "global" | "project") =>
+    request<{ exists: boolean; content: string; path: string }>(
+      `/claude-md/raw?scope=${scope}`,
+    ),
+  update: (scope: "global" | "project", content: string) =>
+    request("/claude-md", {
+      method: "PUT",
+      body: JSON.stringify({ scope, content }),
+    }),
+};
+
 // ─── Projects ───────────────────────────────────────────────────
 
 export interface Project {

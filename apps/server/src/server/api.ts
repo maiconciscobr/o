@@ -3,6 +3,8 @@ import type Database from "better-sqlite3";
 import { runAgent } from "../core/agent.js";
 import { generateId } from "../core/utils.js";
 import { registerMcpConnectRoute } from "./mcp-connect.js";
+import { registerClaudeMdRoutes } from "./claude-md.js";
+import { registerClaudeMemoryRoutes } from "./claude-memory.js";
 import {
   listMemories,
   addMemory,
@@ -31,6 +33,8 @@ import { isKairosRunning } from "../features/kairos/index.js";
 export function registerRoutes(app: FastifyInstance, db: Database.Database): void {
   // MCP connection routes
   registerMcpConnectRoute(app);
+  registerClaudeMdRoutes(app);
+  registerClaudeMemoryRoutes(app);
 
   // Health
   app.get("/api/health", async () => ({

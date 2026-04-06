@@ -1,29 +1,69 @@
-import { useState } from "react";
-import { useMemories } from "../hooks/use-memories";
+import { useState, useEffect, useCallback } from "react";
 
-const CATEGORY_LABELS: Record<string, string> = {
-  preference: "Preferências",
-  fact: "Fatos",
-  constraint: "Restrições",
-  project: "Contexto de projeto",
+interface MemoryFile {
+  name: string;
+  description: string;
+  type: string;
+  content: string;
+  filePath: string;
+  project: string;
+}
+
+interface ProjectMemory {
+  project: string;
+  projectPath: string;
+  index: string;
+  memories: MemoryFile[];
+}
+
+const TYPE_LABELS: Record<string, string> = {
+  user: "Sobre você",
+  feedback: "Feedback",
+  project: "Projeto",
+  reference: "Referência",
   other: "Outros",
 };
 
-const CATEGORY_ORDER = ["preference", "fact", "constraint", "project", "other"];
+const TYPE_COLORS: Record<string, string> = {
+  user: "bg-blue-500/20 text-blue-300",
+  feedback: "bg-amber-500/20 text-amber-300",
+  project: "bg-emerald-500/20 text-emerald-300",
+  reference: "bg-purple-500/20 text-purple-300",
+  other: "bg-zinc-500/20 text-zinc-400",
+};
 
 export function MemoryPanel() {
-  const { grouped, loading, add, remove } = useMemories();
-  const [adding, setAdding] = useState(false);
-  const [newContent, setNewContent] = useState("");
-  const [newCategory, setNewCategory] = useState("fact");
-  const [newImportance, setNewImportance] = useState(5);
+  const [projects, setProjects] = useState<ProjectMemory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const handleAdd = async () => {
-    if (!newContent.trim()) return;
-    await add(newContent.trim(), newCategory, newImportance);
-    setNewContent("");
-    setAdding(false);
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/claude-memory");
+      const data = await res.json();
+      setProjects(data);
+      // Expand all by default
+      setExpanded(new Set(data.map((p: ProjectMemory) => p.projectPath)));
+    } catch {
+      // silent
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const toggle = (projectPath: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(projectPath)) next.delete(projectPath);
+      else next.add(projectPath);
+      return next;
+    });
   };
+
+  const totalMemories = projects.reduce((sum, p) => sum + p.memories.length, 0);
 
   if (loading) {
     return (
@@ -33,105 +73,59 @@ export function MemoryPanel() {
     );
   }
 
-  const hasMemories = Object.keys(grouped).length > 0;
-
   return (
     <div className="h-full overflow-y-auto px-6 py-8">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-3xl">
         <h1 className="text-2xl font-light text-zinc-100">
-          O que o Ō sabe sobre você
+          O que o Claude sabe sobre você
         </h1>
         <p className="mt-2 text-sm text-zinc-500">
-          Tudo aqui é enviado aos seus agentes de IA via MCP. Edite ou delete
-          qualquer coisa a qualquer momento.
+          {totalMemories} memórias em {projects.length} projeto{projects.length !== 1 ? "s" : ""} — lidas de ~/.claude/projects/
         </p>
 
-        {/* Add button */}
-        <div className="mt-6">
-          {!adding ? (
-            <button
-              onClick={() => setAdding(true)}
-              className="rounded-lg border border-dashed border-zinc-700 px-4 py-2 text-sm text-zinc-400 transition hover:border-zinc-500 hover:text-zinc-300"
-            >
-              + Adicionar memória
-            </button>
-          ) : (
-            <div className="space-y-3 rounded-lg border border-zinc-700 bg-zinc-900 p-4">
-              <textarea
-                value={newContent}
-                onChange={(e) => setNewContent(e.target.value)}
-                placeholder="O que o Ō deve lembrar?"
-                className="w-full resize-none rounded border border-zinc-700 bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-zinc-500"
-                rows={2}
-                autoFocus
-              />
-              <div className="flex items-center gap-4">
-                <select
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-300"
-                >
-                  {CATEGORY_ORDER.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {CATEGORY_LABELS[cat]}
-                    </option>
-                  ))}
-                </select>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-zinc-500">Importância:</span>
-                  <input
-                    type="range"
-                    min={1}
-                    max={10}
-                    value={newImportance}
-                    onChange={(e) => setNewImportance(Number(e.target.value))}
-                    className="w-20"
-                  />
-                  <span className="text-xs text-zinc-400">{newImportance}/10</span>
-                </div>
-                <div className="ml-auto flex gap-2">
-                  <button
-                    onClick={() => setAdding(false)}
-                    className="rounded px-3 py-1 text-sm text-zinc-400 hover:text-zinc-200"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleAdd}
-                    disabled={!newContent.trim()}
-                    className="rounded bg-white px-3 py-1 text-sm font-medium text-black hover:bg-zinc-200 disabled:opacity-30"
-                  >
-                    Salvar
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Memory list by category */}
-        {!hasMemories && (
+        {projects.length === 0 && (
           <div className="mt-12 text-center text-sm text-zinc-600">
-            Nenhuma memória ainda. Converse com o Ō ou adicione uma manualmente.
+            Nenhuma memória encontrada. O Claude Code ainda não criou memórias automáticas.
           </div>
         )}
 
-        <div className="mt-8 space-y-8">
-          {CATEGORY_ORDER.filter((cat) => grouped[cat]?.length).map((cat) => (
-            <div key={cat}>
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                {CATEGORY_LABELS[cat]}
-              </h2>
-              <div className="space-y-2">
-                {grouped[cat].map((memory) => (
-                  <MemoryItem
-                    key={memory.id}
-                    content={memory.content}
-                    importance={memory.importance}
-                    onDelete={() => remove(memory.id)}
-                  />
-                ))}
-              </div>
+        <div className="mt-8 space-y-4">
+          {projects.map((project) => (
+            <div key={project.projectPath} className="rounded-lg border border-zinc-800">
+              {/* Project header */}
+              <button
+                onClick={() => toggle(project.projectPath)}
+                className="flex w-full items-center justify-between px-4 py-3 text-left"
+              >
+                <div>
+                  <span className="text-sm font-medium text-zinc-100">
+                    {project.project}
+                  </span>
+                  <span className="ml-2 text-xs text-zinc-600">
+                    {project.memories.length} memória{project.memories.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+                <svg
+                  className={`h-4 w-4 text-zinc-500 transition ${
+                    expanded.has(project.projectPath) ? "rotate-180" : ""
+                  }`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+
+              {/* Memories */}
+              {expanded.has(project.projectPath) && (
+                <div className="border-t border-zinc-800">
+                  {project.memories.map((memory) => (
+                    <MemoryCard key={memory.filePath} memory={memory} />
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -140,42 +134,48 @@ export function MemoryPanel() {
   );
 }
 
-function MemoryItem({
-  content,
-  importance,
-  onDelete,
-}: {
-  content: string;
-  importance: number;
-  onDelete: () => void;
-}) {
+function MemoryCard({ memory }: { memory: MemoryFile }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="group flex items-start gap-3 rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-3">
-      {/* Importance bar */}
-      <div className="mt-1 flex flex-col items-center gap-0.5">
-        {Array.from({ length: 10 }).map((_, i) => (
-          <div
-            key={i}
-            className={`h-1 w-3 rounded-full ${
-              i < importance ? "bg-white" : "bg-zinc-800"
-            }`}
-          />
-        ))}
-      </div>
-
-      {/* Content */}
-      <p className="flex-1 text-sm leading-relaxed text-zinc-300">{content}</p>
-
-      {/* Delete */}
+    <div className="border-b border-zinc-800/50 last:border-0">
       <button
-        onClick={onDelete}
-        className="shrink-0 text-zinc-600 opacity-0 transition group-hover:opacity-100 hover:text-red-400"
-        title="Deletar memória"
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-zinc-900/50"
       >
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <path d="M18 6L6 18M6 6l12 12" />
+        <span
+          className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium uppercase ${
+            TYPE_COLORS[memory.type] || TYPE_COLORS.other
+          }`}
+        >
+          {TYPE_LABELS[memory.type] || memory.type}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-zinc-200">{memory.name}</p>
+          {memory.description && (
+            <p className="mt-0.5 truncate text-xs text-zinc-500">
+              {memory.description}
+            </p>
+          )}
+        </div>
+        <svg
+          className={`mt-1 h-3 w-3 shrink-0 text-zinc-600 transition ${open ? "rotate-180" : ""}`}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path d="M6 9l6 6 6-6" />
         </svg>
       </button>
+
+      {open && (
+        <div className="bg-zinc-900/30 px-4 py-3">
+          <pre className="whitespace-pre-wrap text-xs leading-relaxed text-zinc-400 font-mono">
+            {memory.content}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,44 +3,46 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 
+// Claude Code stores MCP servers in ~/.claude.json (not ~/.claude/settings.json)
+function getClaudeJsonPath(): string {
+  return path.join(os.homedir(), ".claude.json");
+}
+
 export function registerMcpConnectRoute(app: FastifyInstance): void {
   app.post("/api/mcp/connect-claude-code", async (request) => {
-    const settingsPath = path.join(os.homedir(), ".claude", "settings.json");
+    const claudeJsonPath = getClaudeJsonPath();
 
     try {
-      let settings: Record<string, any> = {};
+      let config: Record<string, any> = {};
 
-      if (fs.existsSync(settingsPath)) {
-        const content = fs.readFileSync(settingsPath, "utf-8");
-        settings = JSON.parse(content);
-      } else {
-        // Create .claude directory if it doesn't exist
-        fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
+      if (fs.existsSync(claudeJsonPath)) {
+        const content = fs.readFileSync(claudeJsonPath, "utf-8");
+        config = JSON.parse(content);
       }
 
-      // Initialize mcpServers if not present
-      if (!settings.mcpServers) {
-        settings.mcpServers = {};
+      if (!config.mcpServers) {
+        config.mcpServers = {};
       }
 
-      const mcpPort = Number(process.env.MCP_PORT) || 3132;
       const mcpToken = process.env.MCP_AUTH_TOKEN || "";
+      const dbPath = path.resolve(process.cwd(), "data", "o.db");
 
-      // Add or update the Ō MCP server config
-      settings.mcpServers["o-mcp"] = {
+      config.mcpServers["o-mcp"] = {
+        type: "stdio",
         command: "npx",
-        args: ["o-mcp"],
+        args: ["tsx", path.resolve(process.cwd(), "packages/mcp/src/index.ts")],
         env: {
+          O_DB_PATH: dbPath,
           ...(mcpToken ? { MCP_AUTH_TOKEN: mcpToken } : {}),
         },
       };
 
-      fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), "utf-8");
+      fs.writeFileSync(claudeJsonPath, JSON.stringify(config, null, 2), "utf-8");
 
       return {
         ok: true,
-        message: "Ō MCP server connected to Claude Code",
-        settingsPath,
+        message: "Ō MCP server conectado ao Claude Code",
+        path: claudeJsonPath,
       };
     } catch (err: any) {
       return {
@@ -48,11 +50,12 @@ export function registerMcpConnectRoute(app: FastifyInstance): void {
         error: err.message,
         manual: {
           instruction:
-            "Add this to your ~/.claude/settings.json under mcpServers:",
+            "Adicione isso no ~/.claude.json dentro de mcpServers:",
           config: {
             "o-mcp": {
+              type: "stdio",
               command: "npx",
-              args: ["o-mcp"],
+              args: ["tsx", "caminho/para/packages/mcp/src/index.ts"],
             },
           },
         },
@@ -61,20 +64,20 @@ export function registerMcpConnectRoute(app: FastifyInstance): void {
   });
 
   app.get("/api/mcp/status", async () => {
-    const settingsPath = path.join(os.homedir(), ".claude", "settings.json");
+    const claudeJsonPath = getClaudeJsonPath();
 
     try {
-      if (!fs.existsSync(settingsPath)) {
-        return { connected: false, reason: "settings.json not found" };
+      if (!fs.existsSync(claudeJsonPath)) {
+        return { connected: false, reason: "~/.claude.json não encontrado" };
       }
 
-      const content = fs.readFileSync(settingsPath, "utf-8");
-      const settings = JSON.parse(content);
+      const content = fs.readFileSync(claudeJsonPath, "utf-8");
+      const config = JSON.parse(content);
 
-      const isConnected = !!settings.mcpServers?.["o-mcp"];
+      const isConnected = !!config.mcpServers?.["o-mcp"];
       return { connected: isConnected };
     } catch {
-      return { connected: false, reason: "Could not read settings" };
+      return { connected: false, reason: "Não foi possível ler ~/.claude.json" };
     }
   });
 }
