@@ -1,100 +1,100 @@
 # Ō
 
-> **TODO antes do launch:** gravar GIF de 8s mostrando — agente abre sessão → Ō injeta contexto via MCP → agente já sabe stack, restrições e projeto ativo sem nenhuma explicação. Colocar aqui no lugar desse bloco.
+**Dashboard para power users do Claude Code.**
 
-**Your AI agents forget you. Ō doesn't.**
-
-Ō is an open source identity layer for developers. It remembers who you are — your stack, your constraints, your projects — and feeds that context to Claude Code, Cursor, or any MCP-compatible agent automatically, before the session even starts.
-
-No more re-explaining. No more `CLAUDE.md` files you have to maintain by hand.
+Tudo que você configura na mão em JSONs e arquivos markdown, agora tem interface visual.
 
 ---
 
-## The problem
+## O que o Ō mostra
 
-Every session with an AI agent starts from zero.
+| O que está escondido | Onde fica | O que o Ō faz |
+|---|---|---|
+| Memórias automáticas | `~/.claude/projects/*/memory/` | Mostra por projeto, expande em side sheet |
+| Instruções para agentes | `~/.claude/CLAUDE.md` + projetos | Visualiza por seções, edita inline |
+| Plugins instalados | `~/.claude/settings.json` | Lista com toggle on/off em tempo real |
+| MCP servers | `~/.claude.json` | Lista com status de conexão |
+| Marketplaces | `~/.claude/settings.json` | Lista fontes configuradas |
 
-You explain your stack. You explain that you use Bun, not Node. You explain the contractual constraint that rules out certain side projects. You explain which server the thing runs on. Then the session ends, and next time you explain it all again.
-
-`CLAUDE.md` helps. But you write it, you maintain it, and it only covers one project at a time.
-
----
-
-## How it works
-
-**1. You talk to Ō once.**
-Tell it about yourself — your stack, preferences, constraints, what you're working on. Or just start working and let KAIROS figure it out.
-
-**2. KAIROS learns in the background.**
-A lightweight daemon reads your sessions, extracts what matters, and keeps your context up to date. You never touch a config file again.
-
-**3. Every agent session starts informed.**
-Ō runs a local MCP server. Claude Code, Cursor, and Windsurf connect to it and receive your full context before the first message. One click to connect.
+Além disso, o **chat lateral** é um assistente de curadoria de identidade. Ele lê seus dados reais e pode **editar seu CLAUDE.md** direto pela conversa.
 
 ---
 
-## Install
+## Requisitos
+
+- Node.js 20+
+- Anthropic API key (para o chat lateral)
+
+---
+
+## Instalação
 
 ```bash
-npx create-o-app
+git clone https://github.com/maiconciscobr/o.git
+cd o
+npm install
+npx tsx scripts/setup.ts
 ```
 
-Opens in your browser. No config files, no YAML, no manual setup.
+Adicione sua `ANTHROPIC_API_KEY` no arquivo `.env` gerado.
 
-To connect Claude Code: click **"Connect to Claude Code"** inside Ō. Done.
+```bash
+npm run dev
+```
 
-> Requires Node.js 20+ and an Anthropic API key.
-
----
-
-## What Ō knows about you
-
-After your first conversation, you'll see a screen called **"What Ō knows about you"** — a live, editable list of everything the system has learned. You control what gets sent to agents. Edit, delete, or add anything at any time.
+Abre `http://localhost:5173`.
 
 ---
 
-## Security
+## Conectar ao Claude Code
 
-- **Everything stays local.** Memories live in a SQLite database on your machine. Nothing is sent anywhere except the Anthropic API.
-- **MCP server is localhost-only by default.** No external process can reach your context.
-- **Your API key never leaves your machine.** Ō calls Anthropic directly — no Ō cloud in the middle.
-- **You own your data.** Export or wipe everything at any time.
+Clique em **"Conectar ao Claude Code"** no header, ou rode manualmente:
 
----
-
-## v0.1 — what's here now
-
-- Chat interface with persistent memory
-- KAIROS — background daemon that learns from your sessions automatically
-- "What Ō knows about you" — editable memory panel
-- MCP server — one-click connection to Claude Code, Cursor, Windsurf
-- Project system — conversations, files, tasks, and notes grouped per project
-- Self-hosted, MIT licensed, no accounts required
+```bash
+claude mcp add o-mcp --transport stdio --scope user -- npx tsx /caminho/para/o/packages/mcp/src/index.ts
+```
 
 ---
 
-## Roadmap
+## Auto-start no Windows
 
-**v0.2**
-- Sync context across machines
-- Multi-profile support
-- Slash commands to query your own context mid-session
+```bash
+# Executar como administrador
+scripts/install.bat
+```
 
-**v0.3**
-- One-line install script
-- Homebrew tap / Windows installer
-- Context diff — see exactly what KAIROS changed and why
+O servidor roda invisível (sem janela) toda vez que você liga o PC.
 
 ---
 
-## Contributing
+## Stack
 
-Ō is early. The best contribution right now is using it, breaking it, and opening issues.
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for dev setup and what we're actively working on.
+- **Frontend:** React + Vite + Tailwind CSS
+- **Backend:** Fastify + SQLite (better-sqlite3)
+- **MCP:** @modelcontextprotocol/sdk
+- **AI (chat):** Anthropic SDK
+- **Estrutura:** Monorepo com npm workspaces
 
 ---
 
-## License
+## Estrutura
+
+```
+o/
+├── apps/web/          # Dashboard React
+├── apps/server/       # API Fastify
+├── packages/mcp/      # MCP server standalone
+└── scripts/           # Setup e auto-start
+```
+
+---
+
+## Contribuindo
+
+Veja [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+---
+
+## Licença
 
 MIT

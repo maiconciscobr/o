@@ -9,14 +9,12 @@ import cors from "@fastify/cors";
 import { getDb } from "./core/db.js";
 import { registerRoutes } from "./server/api.js";
 import { authMiddleware } from "./server/auth.js";
-import { startKairos, stopKairos } from "./features/kairos/index.js";
 
 const db = getDb();
 const server = Fastify({ logger: true });
 
 await server.register(cors, { origin: true });
 
-// Auth on all /api routes
 server.addHook("onRequest", async (request, reply) => {
   if (request.url.startsWith("/api")) {
     await authMiddleware(request, reply);
@@ -30,11 +28,7 @@ const port = Number(process.env.PORT) || 3131;
 await server.listen({ port, host: "127.0.0.1" });
 console.log(`Ō server listening on http://localhost:${port}`);
 
-startKairos(db);
-
-// Graceful shutdown
 const shutdown = async () => {
-  stopKairos(db);
   await server.close();
   db.close();
   process.exit(0);
