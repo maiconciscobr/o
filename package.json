@@ -2,7 +2,7 @@
   "name": "o",
   "private": true,
   "version": "0.1.0",
-  "description": "Your AI agents forget you. Ō doesn't.",
+  "description": "Dashboard para power users do Claude Code",
   "license": "MIT",
   "workspaces": [
     "apps/web",
@@ -10,10 +10,13 @@
     "packages/mcp"
   ],
   "scripts": {
-    "dev": "npm run dev --workspaces --if-present",
+    "setup": "tsx scripts/setup.ts",
+    "dev": "concurrently -n server,web -c blue,green \"npm run dev -w apps/server\" \"npm run dev -w apps/web\"",
     "build": "npm run build --workspaces --if-present",
-    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   },
   "engines": {
     "node": ">=20.0.0"
