@@ -284,11 +284,9 @@ export function ChatPanel() {
                 </div>
 
                 {/* Timestamp on hover */}
-                <div className="mt-1 h-4 overflow-hidden">
-                  <span className="text-[10px] text-zinc-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    {timeAgo(m.timestamp)}
-                  </span>
-                </div>
+                <span className="mt-0.5 block text-[10px] text-zinc-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100 h-0 group-hover:h-auto">
+                  {timeAgo(m.timestamp)}
+                </span>
               </div>
             </div>
           ))}
