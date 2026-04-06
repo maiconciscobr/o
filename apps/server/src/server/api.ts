@@ -5,6 +5,7 @@ import { generateId } from "../core/utils.js";
 import { registerMcpConnectRoute } from "./mcp-connect.js";
 import { registerClaudeMdRoutes } from "./claude-md.js";
 import { registerClaudeMemoryRoutes } from "./claude-memory.js";
+import { registerPluginRoutes } from "./claude-plugins.js";
 import {
   listMemories,
   addMemory,
@@ -35,6 +36,7 @@ export function registerRoutes(app: FastifyInstance, db: Database.Database): voi
   registerMcpConnectRoute(app);
   registerClaudeMdRoutes(app);
   registerClaudeMemoryRoutes(app);
+  registerPluginRoutes(app);
 
   // Health
   app.get("/api/health", async () => ({

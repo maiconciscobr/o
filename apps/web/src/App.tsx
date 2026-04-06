@@ -3,10 +3,11 @@ import { Sidebar } from "./components/Sidebar";
 import { ChatWindow } from "./components/ChatWindow";
 import { MemoryPanel } from "./components/MemoryPanel";
 import { ClaudeMdViewer } from "./components/ClaudeMdViewer";
+import { PluginsPanel } from "./components/PluginsPanel";
 import { McpStatus } from "./components/McpStatus";
 import { Onboarding } from "./components/Onboarding";
 
-export type View = "chat" | "memories" | "claude-md";
+export type View = "chat" | "memories" | "claude-md" | "ecosystem";
 
 const ONBOARDING_KEY = "o-onboarding-complete";
 
@@ -14,10 +15,11 @@ const VIEW_LABELS: Record<View, string> = {
   chat: "Chat",
   memories: "Memórias",
   "claude-md": "CLAUDE.md",
+  ecosystem: "Ecossistema",
 };
 
 export function App() {
-  const [view, setView] = useState<View>("chat");
+  const [view, setView] = useState<View>("memories");
   const [onboarded] = useState(() => {
     return localStorage.getItem(ONBOARDING_KEY) === "true";
   });
@@ -51,6 +53,7 @@ export function App() {
           {view === "chat" && <ChatWindow />}
           {view === "memories" && <MemoryPanel />}
           {view === "claude-md" && <ClaudeMdViewer />}
+          {view === "ecosystem" && <PluginsPanel />}
         </main>
       </div>
     </div>
